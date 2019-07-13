@@ -21,15 +21,19 @@
 
 ## Configuration Steps
 
+The following steps will take you through how to create your own Amazon Lightsail hosted Ubuntu Linux server using the steps I took to create mine.
+
 1. First, create a new Ubuntu Linux Server Instance
-	* Login or create an account if you don't have one
+	* [Login or create an account](https://lightsail.aws.amazon.com/) if you don't have one
 	* Create an instance
 	* Make sure you select <strong>OS only</strong>
-	* Choose <strong>Ubuntu</strong> as the instance image
-	* Choose an instance plan (we chose the cheapest one for this project)
-	* Give the instance a host name - we called ours <strong>linux-server-config-project</strong>
+	* Choose <strong>Ubuntu</strong> as the instance image - I chose <strong>Ubuntu 16.04 LTS</strong>
+	* Choose an instance plan (I chose the cheapest one for this project)
+	* Give the instance a host name - I called mine <strong>linux-server-config-project</strong>
 	* Wait for it to start and then use it!
-2. 
+2. Update all currently installed packages
+	* `sudo apt-get update`
+	* `sudo apt-get upgrade`
 
 ## Third-Party Resources Used to Help
 
