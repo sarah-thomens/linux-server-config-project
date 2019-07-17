@@ -46,9 +46,52 @@ The following steps will take you through how to create your own Amazon Lightsai
 		6. Finally, connect to the Lightsail server
 			* `ssh -i ~/.ssh/udacity_key.rsa ubuntu@3.90.7.32`
 			* 3.90.7.32 is the public IP address for the server
+			* All following commands should be run from the server terminal unless otherwise specified.
 3. Update all currently installed packages
 	* `sudo apt-get update`
 	* `sudo apt-get upgrade`
+4. Configure the Lightsail Firewall
+	* Change the SSH port from 22 to 2200 and make sure to allow it in the firewall.
+		1. Edit <strong>sshd_config</strong> file
+			* `sudo nano /etc/ssh/sshd_config`
+		2. On Line 5, where it says Port 22, change to Port 2200
+			* This will help add an additional layer of security by changing the port from the default.
+		3. Find the line PermitRootLogin and edit from saying <strong>prohibit-password</strong> to <strong>no</strong>
+			* This prevents users from logging in as the root and gaining access to the entire server.
+		4. Save the file with <strong>CTRL + O</strong>
+		5. Exit the file with <strong>CTRL + X</strong>
+		6. Force the server to restart the SSH connection and use these new settings:
+			* `sudo service ssh restart`
+	* Configure the Firewall to only allow incoming connections for SSH (port 2200), HTTP (port 80), and NTP (port 123).
+		1. To check that the status of the firewall is <strong>inactive</strong>
+			* `sudo ufw status`
+		2. To make the configuration easier, begin by denying all incoming messages and allowing all outgoing messages by default
+			* `sudo ufw default deny incoming`
+			* `sudo ufw default allow outgoing`
+		3. Allow the individual ports for SSH, HTTP, and NTP
+			* `sudo ufw allow 2200/tcp`
+			* `sudo ufw allow www`
+			* `sudo ufw allow 123/udp`
+		4. Deny the default port 22
+			* `sudo ufw deny 22`
+		5. Enable the Firewall
+			* `sudo ufw enable`
+			* It will prompt you saying it could interrupt ssh connections. Type <strong>y</strong>
+			* Exit the server: `exit`
+		6. Configure the Firewall Settings on Amazon Lightsail
+			* Open the instance of your server
+			* Click the Networking tab within the instance
+			* Change the Firewall rules to follow what was done in the terminal
+			* HTTP Port 80 stays the same
+			* Deny Port 22 labelled as SSH
+			* Create a custom rule with protocol TCP and port 2200 for the new SSH port
+			* Create a custom rule with protocol UDP and port 123 for the NTP port
+		7. Restart the server from your terminal to make sure the firewall still allows SSH incoming
+			* `ssh -i ~/.ssh/udacity_key.rsa -p 2200 ubuntu@3.90.7.32`
+
+
+
+
 
 ## Third-Party Resources Used to Help
 
