@@ -6,7 +6,7 @@
 ## IP Address and SSH Port
 
 * Public IP Address: 3.90.7.32
-* SSH Port:
+* SSH Port: 2200
 
 
 ## URL to Hosted Web Application
@@ -88,6 +88,39 @@ The following steps will take you through how to create your own Amazon Lightsai
 			* Create a custom rule with protocol UDP and port 123 for the NTP port
 		7. Restart the server from your terminal to make sure the firewall still allows SSH incoming
 			* `ssh -i ~/.ssh/udacity_key.rsa -p 2200 ubuntu@3.90.7.32`
+	* Give Grader Access to Server
+		1. Running the server from your terminal, create a new user named grader
+			* `sudo adduser grader`
+			* Type an initial password (this will not be used later, so make it something you can remember initially)
+			* Follow the prompts and give the user a name and other information
+		2. Give the new user sudo capabilities
+			* `sudo visudo` - this opens the sudoers file for you to edit
+			* Find the line that says <strong>root ALL=(ALL:ALL) ALL</strong> and add below it the line <strong>grader ALL=(ALL:ALL) ALL</strong>
+				* This adds the new user to the list of sudoers
+			* Save the changes: `CTRL + O`
+			* Exit the file: `CTRL + X`
+		3. Create an SSH key pair for the new grader user using the ssh-keygen tool
+			* Open a new terminal running from your local machine
+			* Change to the /.ssh directory: `cd ~/.ssh`
+			* Create a new keygen file: `ssh-keygen -f ~/.ssh/grader_key.rsa`
+			* If you want to create a passphrase for the new user, do this here, but it is not necessary to do so. Just press enter twice without typing anything to skip the passphrase.
+			* Now we need to copy the key from the new file
+				* Display the file contents: `cat ~/.ssh/grader_key.rsa.pub`
+				* Copy what is displayed
+			* Go back to the original ubuntu terminal create an authorized_keys file
+				* `cd /home/grader`
+				* If there is no .ssh directory, create one: `sudo mkdir .ssh`
+				* `cd .ssh`
+				* Create the authorized_keys file: `sudo touch authorized_keys`
+				* Open the file to edit: `sudo nano authorized_keys`
+				* Paste what was in the grader_key.rsa.pub file into the authorized_keys file
+				* Save the file: `CTRL + O`
+				* Exit the file: `CTRL + X`
+			* Change the permissions of the files to grader
+				* `sudo chmod 700 /home/grader/.ssh` - set the .ssh directory permissions so only grader can access
+				* `sudo chmod 644 /home/grader/.ssh/authorized_keys` - allowed the grader to read and write authorized_keys and everyone else to only read
+				* `sudo chown -R grader:grader /home/grader/.ssh` - changes the owner of the .ssh directory to grader
+				* `sudo service ssh restart` - restart the server
 
 
 
