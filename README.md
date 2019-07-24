@@ -121,8 +121,69 @@ The following steps will take you through how to create your own Amazon Lightsai
 				* `sudo chmod 644 /home/grader/.ssh/authorized_keys` - allowed the grader to read and write authorized_keys and everyone else to only read
 				* `sudo chown -R grader:grader /home/grader/.ssh` - changes the owner of the .ssh directory to grader
 				* `sudo service ssh restart` - restart the server
+	* Configure the server to host a Project
+		1. Configure the local timezone to be UTC
+			* `sudo dpkg-reconfigure tzdata`
+			* Choose the option None of the above
+			* Choose the option UTC
+		2. Install and configure Apache to serve a Python mod_wsgi application.
+			* Install Apache: `sudo apt-get install apache2`
+			* To make sure Apache installed properly, type the public IP address(3.90.7.32) into your address bar and the Apache2 Ubuntu Default Page should appear
+			* <strong>(WARNING - DO NOT DO BOTH STEPS - having two mod_wsgi packages installed will cause errors, choose one for either Python 2.7 OR Python 3)</strong>
+				* For projects using Python 2.7
+					* Download and install python 2.7: `sudo apt install python2.7 python-pip`
+						* Do not uninstall Python 3, this will cause server issues
+					* Download and install the application handler mod_wsgi: `sudo apt-get install libapache2-mod-wsgi`
+				* For projects using Python 3
+					* Download and install the application handler mod_wsgi: `sudo apt-get install libapache2-mod-wsgi-py3`
+			* To make sure the application handler is enabled: `sudo a2enmod wsgi`
+			* Restart the server with the new module: `sudo service apache2 start`
+		3. Install Git on the server
+			* `sudo apt-get install git`
+		4. Clone the project into the server from GitHub
+			* Change your directory to where the project will be placed: `cd /var/www`
+			* Make a new directory with the title of your project: `sudo mkdir catalog`
+			* Change the owner of the folder to the grader: `sudo chown -R grader:grader catalog`
+			* Move inside your new folder: `cd catalog`
+			* Clone your project repository from Github: `git clone https://github.com/sarah-thomens/item-catalog-project.git catalog`
+			* Make a catalog.wsgi file to allow the application to be served over the mod_wsgi: `sudo nano catalog.wsg`
+			* This is how the file should look:
+					import sys
+					import logging
+					logging.basicConfig(stream=sys.stderr)
+					sys.path.insert(0, "/var/www/catalog/")
 
-
+					from catalog import app as application
+		5. Installing the Project's Dependencies
+			* To isolate your project from updates - such as newer versions of python, use a virtual environment.
+				* Install virtualenv: `sudo pip install virtualenv`
+				* Create your new virtual environment: `sudo virtualenv venv`
+				* Activate the new environment: `source venv/bin/activate`
+				* Change permissions to the virtual environment folder so all parties have read, write, and execute privileges: `sudo chmod -R 777 venv`
+			* Install Flask so your Flask project will run properly: `pip install Flask`
+			* Install all other project dependencies: `pip install bleach httplib2 request oauth2client sqlalchemy psycopg2-binary`(psycopg2-binary was different from online)
+		6. Configure and Enable a new Virtual Host for your Project
+			* Create a virtual host configuration file: `sudo nano /etc/apache2/sites-available/catalog.conf`
+			* The file should look like this:
+					`<VirtualHost *:80>
+						ServerName 3.90.7.32
+						WSGIDaemonProcess catalog python-path=/var/www/catalog:/var/www/catalog/venv/lib/python2.7/site-packages
+						WSGIProcessGroup catalog
+						WSGIScriptAlias / /var/www/catalog/catalog.wsgi
+						<Directory /var/www/catalog/catalog/>
+							Order allow,deny
+							Allow from all
+						</Directory>
+						Alias /static /var/www/catalog/catalog/static
+						<Directory /var/www/catalog/catalog/static/>
+							Order allow,deny
+							Allow from all
+						</Directory>
+						ErrorLog ${APACHE_LOG_DIR}/error.log
+						LogLevel warn
+						CustomLog ${APACHE_LOG_DIR}/access.log combined
+					</VirtualHost>`
+			* Enable the newly created virtual host: `sudo a2ensite catalog`
 
 
 
