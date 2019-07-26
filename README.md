@@ -20,6 +20,13 @@
 * Mod-WSGI
 * Git
 * python-setuptools
+* virtualenv
+* flask
+* httplib2
+* requests
+* oauth2client
+* SQLAlchemy
+* Python PostgreSQL adaptor psycopg
 
 
 
@@ -316,38 +323,70 @@ The following steps will take you through how to create your own Amazon Lightsai
 
 
 #### Install and Configure PostgreSQL
-			* Install some python packages for working with PostgreSQL: `sudo apt-get install libpq-dev python-dev`
-			* Install PostgreSQL: `sudo apt-get install postgresql postgresql-contrib`
-			* When installing, Postgre creates a user that can access the database system. Switch to this user: `sudo su - postgres`
-			* Connect to the database system: `psql`
-			* Create a new user for your project with a password: `CREATE USER catalog WITH PASSWORD 'password';`
-			* Give the catalog user the ability to use CREATEDB: `ALTER USER catalog CREATEDB;`
-			* Create a database owned by the catalog user: `CREATE DATABASE catalog WITH OWNER catalog;`
-			* Connect to the newly created database: `\c catalog`
-			* Revoke all of the rights from general users: `REVOKE ALL ON SCHEMA public FROM public;`
-			* Make permissions so only catalog user can create tables: `GRANT ALL ON SCHEMA public TO catalog;`
-			* Logout of PostgreSQL: `\q`
-			* Return to your user: `exit`
-			* Change the database connection line in the application.py file
-				1. `cd /var/www/catalog/catalog`
-				2. `sudo nano application.py`
-				3. Find the line that starts <strong>engine =</strong> and replace with <strong>engine = create_engine('postgresql://catalog:password@localhost/catalog')</strong>
-				4. Save file: `CTRL + O`
-				5. Exit file: `CTRL + X`
-			* Set up the database by running your database_setup.py file: `python /var/www/catalog/catalog/database_setup.py`
-			* Make sure no remote connections to the database are allowed to prevent potential threats.
-				* Open file: `sudo nano /etc/postgresql/9.5/main/pg_hba.conf`
-				* Edit to look like this:
-						local   all             postgres                                peer
-						local   all             all                                     peer
-						host    all             all             127.0.0.1/32            md5
-						host    all             all             ::1/128                 md5
-
-
-
+1. Install PostgreSQL
+	* `sudo apt-get install postgresql postgresql-contrib`
+2. Check to make sure no remote connections are allowed, this is the default
+	* `sudo nano /etc/postgresql/9.5/main/pg_hba.conf`
+	* Edit to look like this:
+		```
+		local   all             postgres                                peer
+		local   all             all                                     peer
+		host    all             all             127.0.0.1/32            md5
+		host    all             all             ::1/128                 md5
+		```
+3. Make sure you are in the project directory
+	* `cd /var/www/catalog/catalog`
+4. Open your project's database setup file
+	* `sudo nano database_setup.py`
+5. Find the line beginning with <strong>engine</strong> and change to:
+	* <strong>engine = create_engine('postgresql://catalog:password@localhost/catalog')</strong>
+	* Save the file: `CTRL + O`
+	* Close the file: `CTRL + X`
+6. Open your project's application file
+	* `sudo nano application.py`
+7. Once again, find the line beginning with <strong>engine</strong> and change it to the same line as in the database_setup file:
+	* <strong>engine = create_engine('postgresql://catalog:password@localhost/catalog')</strong>
+	* Save the file: `CTRL + O`
+	* Close the file: `CTRL + X`
+8. Remove the test file you created to test the server
+	* `sudo rm __init__.py`
+9. Change the name of the application.py file to __init__.py
+	* `sudo mv application.py __init__.py`
+10. Create needed linux user for psql:
+	* `sudo adduser catalog`
+	* Choose a password
+11. When installing, Postgre creates a user that can access the database system. Switch to this user
+	* `sudo su - postgres`
+12. Connect to the database system
+	* `psql`
+13. Create a new user for your project with a password
+	* `CREATE USER catalog WITH PASSWORD 'password';`
+	* The password should be the same as the engine lines we changed in application.py and database_setup.py
+14. Give the catalog user the ability to create databases
+	* `ALTER USER catalog CREATEDB;`
+15. Check current roles and their attributes
+	* `\du`
+16. Create a database owned by the catalog user
+	* `CREATE DATABASE catalog WITH OWNER catalog;`
+17. Connect to the newly created database
+	* `\c catalog`
+18. Revoke all of the rights from general users
+	* `REVOKE ALL ON SCHEMA public FROM public;`
+19. Make permissions so only catalog user can create tables
+	* `GRANT ALL ON SCHEMA public TO catalog;`
+20. Logout of PostgreSQL: `\q`
+21. Return to your ubuntu command line: `exit`
+22. Set up the database by running your database_setup.py file:
+	* `python /var/www/catalog/catalog/database_setup.py`
 
 
 ## Third-Party Resources Used to Help
 
 * Udacity has a great course on learning how to make a linux server from scratch. To access, click [here](https://classroom.udacity.com/courses/ud299)
 * This project uses [Amazon Lightsail](https://lightsail.aws.amazon.com/ls/webapp/home/instances) to host our server.
+* This website helped greatly when trying to deploy the Flask Application in the Ubuntu server.
+	* [DigitalOcean: How To Deploy a Flask Application on an Ubuntu VPS](https://www.digitalocean.com/community/tutorials/how-to-deploy-a-flask-application-on-an-ubuntu-vps)
+* I used the help of several other Udacity students' projects to piece together my own.
+	* [stueken](https://github.com/stueken/FSND-P5_Linux-Server-Configuration)
+	* [kcalata](https://github.com/kcalata/Linux-Server-Configuration/blob/master/README.md)
+	* [iliketomatoes](https://github.com/iliketomatoes/linux_server_configuration)
