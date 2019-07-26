@@ -4,34 +4,29 @@
 
 
 ## IP Address and SSH Port
-
-* Public IP Address: 3.90.7.32
+* Public IP Address: 18.212.16.202
 * SSH Port: 2200
 
 
 ## URL to Hosted Web Application
-
-* URL:
+* URL: 18.212.16.202
 
 
 ## Software Installed
-
-* Apache
-* Mod-WSGI
-* Git
-* python-setuptools
-* virtualenv
-* flask
-* httplib2
-* requests
-* oauth2client
-* SQLAlchemy
-* Python PostgreSQL adaptor psycopg
-
-
+* <strong>Apache2 Server</strong> - this is the server we are using to run this project
+* <strong>Mod-WSGI</strong> - this is an application handler for the Apache2 server
+* <strong>Git</strong> - this is the version control system being used by our project
+* <strong>python-setuptools</strong> - development tools to help package python projects
+* <strong>virtualenv</strong> - this is the virtual environment we used to help separate the project from the rest of the server
+* <strong>Flask</strong> - this is the framework used to help create our project
+* <strong>httplib2</strong> - this is a comprehensive HTTP library
+* <strong>requests</strong> - this is another HTTP library
+* <strong>oauth2client</strong> - This is a Python library for accessing resources protected by OAuth 2.0
+* <strong>SQLAlchemy</strong> - this is a python SQL toolkit
+* <strong>PostgreSQL</strong> - this is an open source database
+* <strong>Python PostgreSQL adaptor psycopg</strong> - PostgreSQL adapter for the Python programming language
 
 ## Configuration Steps
-
 The following steps will take you through how to create your own Amazon Lightsail hosted Ubuntu Linux server using the steps I took to create mine.
 
 
@@ -56,12 +51,12 @@ The following steps will take you through how to create your own Amazon Lightsai
 4. Move to the ~/.ssh directory
 	* `cd ~/.ssh`
 5. Rename the default file
-	* `mv <PRIVATE-KEY-FILE-NAME-HERE> udacity_key.rsa`
+	* `mv <PRIVATE-KEY-FILE-NAME-HERE> udacity_key_2.rsa`
 6. Change the file permissions for the private key to read/write
-	* `chmod 600 ~/.ssh/udacity_key.rsa`
+	* `chmod 600 ~/.ssh/udacity_key_2.rsa`
 7. Finally, connect to the Lightsail server
-	* `ssh -i ~/.ssh/udacity_key.rsa ubuntu@<YOUR-PUBLIC-IP-ADDRESS>`
-	* 3.90.7.32 is the public IP address for my server, use your own here
+	* `ssh -i ~/.ssh/udacity_key_2.rsa ubuntu@<YOUR-PUBLIC-IP-ADDRESS>`
+	* 18.212.16.202 is the public IP address for my server, use your own here
 	* All following commands should be run from the server terminal unless otherwise specified.
 
 
@@ -106,7 +101,7 @@ The following steps will take you through how to create your own Amazon Lightsai
 		* Create a custom rule with protocol TCP and port 2200 for the new SSH port
 		* Create a custom rule with protocol UDP and port 123 for the NTP port
 4. Restart the server from your terminal to make sure the firewall still allows SSH incoming
-	* `ssh -i ~/.ssh/udacity_key.rsa -p 2200 ubuntu@3.90.7.32`
+	* `ssh -i ~/.ssh/udacity_key.rsa -p 2200 ubuntu@18.212.16.202`
 
 
 #### Give Grader Access to Server
@@ -129,11 +124,11 @@ The following steps will take you through how to create your own Amazon Lightsai
 	* Change to the /.ssh directory
 		* `cd ~/.ssh`
 	* Create a new keygen file
-		* `ssh-keygen -f ~/.ssh/grader_key.rsa`
+		* `ssh-keygen -f ~/.ssh/grader_key_2.rsa`
 	* If you want to create a passphrase for the new user, do this here, but it is not necessary to do so. Just press enter twice without typing anything to skip the passphrase.
 4. Copy the key from the new file to the authorized_keys file
 	* Display the file contents
-		* `cat ~/.ssh/grader_key.rsa.pub`
+		* `cat ~/.ssh/grader_key_2.rsa.pub`
 	* Copy what is displayed
 	* Go back to the original ubuntu terminal, create an authorized_keys file
 		* `cd /home/grader`
@@ -163,7 +158,7 @@ The following steps will take you through how to create your own Amazon Lightsai
 #### Install and configure Apache to serve a Python mod_wsgi application.
 1. Install Apache
 	* `sudo apt-get install apache2`
-2. To make sure Apache installed properly, type your public IP address(3.90.7.32) into your address bar and the Apache2 Ubuntu Default Page should appear
+2. To make sure Apache installed properly, type your public IP address(18.212.16.202) into your address bar and the Apache2 Ubuntu Default Page should appear
 3. Install the application handler mod_wsgi and python helper package python-setuptools
 	* <strong>(WARNING - DO NOT DO BOTH STEPS - having two mod_wsgi packages installed will cause errors, choose one for a Python 2.7 OR Python 3 project)</strong>
 		* For projects using Python 2.7
@@ -244,8 +239,8 @@ The following steps will take you through how to create your own Amazon Lightsai
 	* The file should look like this:
 		```
 		<VirtualHost *:80>
-			ServerName 3.90.7.32
-			ServerAlias ec2-3-90-7-32.compute-1.amazonaws.com
+			ServerName 18.212.16.202
+			ServerAlias ec2-18-212-16-202.compute-1.amazonaws.com
 			WSGIDaemonProcess catalog python-path=/var/www/catalog:/var/www/catalog/venv/lib/python2.7/site-packages
 			WSGIProcessGroup catalog
 			WSGIScriptAlias / /var/www/catalog/catalog.wsgi
@@ -275,12 +270,13 @@ The following steps will take you through how to create your own Amazon Lightsai
 		import logging
 		logging.basicConfig(stream=sys.stderr)
 		sys.path.insert(0, "/var/www/catalog/")
+		sys.path.append("/var/www/catalog/catalog")
 
 		from catalog import app as application
 		```
 14. Restart Apache to make sure all changes are being used
 	* `sudo service apache2 restart`
-15. Check to see if your simple project is running by typing your public IP address(3.90.7.32) into your browser
+15. Check to see if your simple project is running by typing your public IP address(18.212.16.202) into your browser
 
 
 #### Cloning GitHub Project to the Server
@@ -305,6 +301,18 @@ The following steps will take you through how to create your own Amazon Lightsai
 	if __name__ == "__main__":
 		app.run()
 	```
+3. We need to fix a path so that the project can find certain files. The client secret file path needs to be changed in the application.py
+	* `sudo nano application.py`
+	* Find the line that begins with <strong>CLIENT_ID</strong>
+	* Change the line to look like this:
+		* <strong>CLIENT_ID = json.loads(open('/var/www/catalog/catalog/client_secrets.json', 'r').read())['web']['client_id']</strong>
+4. Finally, we need to move a line in application.py somewhere else so it can be called.
+	* `sudo nano application.py`
+	* Scroll to the bottom of the file
+	* Find the line that starts with <strong>app.secret_key</strong>
+	* Move this line outside of the if statement it is in
+	* Save the file: `CTRL + O`
+	* Exit the file: `CTRL + X`
 
 
 #### Installing the Project's Dependencies
@@ -313,7 +321,7 @@ The following steps will take you through how to create your own Amazon Lightsai
 2. Install the httplib2 module
 	* `pip install httplib2`
 3. Install the requests module
-	* `pip install requests`
+	* `sudo pip install requests`
 4. Install the oauth2client
 	* `sudo pip install --upgrade oauth2client`
 5. Install SQLAlchemy
@@ -327,7 +335,7 @@ The following steps will take you through how to create your own Amazon Lightsai
 	* `sudo apt-get install postgresql postgresql-contrib`
 2. Check to make sure no remote connections are allowed, this is the default
 	* `sudo nano /etc/postgresql/9.5/main/pg_hba.conf`
-	* Edit to look like this:
+	* Edit to look like this, if needed (ignore all comment lines):
 		```
 		local   all             postgres                                peer
 		local   all             all                                     peer
@@ -348,36 +356,54 @@ The following steps will take you through how to create your own Amazon Lightsai
 	* <strong>engine = create_engine('postgresql://catalog:password@localhost/catalog')</strong>
 	* Save the file: `CTRL + O`
 	* Close the file: `CTRL + X`
-8. Remove the test file you created to test the server
+8. If you have a starter items file that adds items to your database. You also need to change the engine line in this file as well.
+	* `sudo nano <STARTER-ITEM-FILE>.py`
+	* Find the line beginning with <strong>engine</strong>
+	* Change the line to: * <strong>engine = create_engine('postgresql://catalog:password@localhost/catalog')</strong>
+	* Save the file: `CTRL + O`
+	* Close the file: `CTRL + X`
+9. Remove the test file you created to test the server
 	* `sudo rm __init__.py`
-9. Change the name of the application.py file to __init__.py
+10. Change the name of the application.py file to __init__.py
 	* `sudo mv application.py __init__.py`
-10. Create needed linux user for psql:
+11. Create needed linux user for psql:
 	* `sudo adduser catalog`
 	* Choose a password
-11. When installing, Postgre creates a user that can access the database system. Switch to this user
+12. When installing, Postgre creates a user that can access the database system. Switch to this user
 	* `sudo su - postgres`
-12. Connect to the database system
+13. Connect to the database system
 	* `psql`
-13. Create a new user for your project with a password
+14. Create a new user for your project with a password
 	* `CREATE USER catalog WITH PASSWORD 'password';`
 	* The password should be the same as the engine lines we changed in application.py and database_setup.py
-14. Give the catalog user the ability to create databases
+15. Give the catalog user the ability to create databases
 	* `ALTER USER catalog CREATEDB;`
-15. Check current roles and their attributes
+16. Check current roles and their attributes
 	* `\du`
-16. Create a database owned by the catalog user
+17. Create a database owned by the catalog user
 	* `CREATE DATABASE catalog WITH OWNER catalog;`
-17. Connect to the newly created database
+18. Connect to the newly created database
 	* `\c catalog`
-18. Revoke all of the rights from general users
+19. Revoke all of the rights from general users
 	* `REVOKE ALL ON SCHEMA public FROM public;`
-19. Make permissions so only catalog user can create tables
+20. Make permissions so only catalog user can create tables
 	* `GRANT ALL ON SCHEMA public TO catalog;`
-20. Logout of PostgreSQL: `\q`
-21. Return to your ubuntu command line: `exit`
-22. Set up the database by running your database_setup.py file:
-	* `python /var/www/catalog/catalog/database_setup.py`
+21. Logout of PostgreSQL: `\q`
+22. Return to your ubuntu command line: `exit`
+23. Set up the database by running your database_setup.py file:
+	* `python database_setup.py`
+
+
+#### Run Your Application
+1. Restart apache
+	* `sudo service apache2 restart`
+2. Open your browser and type in your public IP address (18.212.16.202)
+3. If everything works, your application should show here
+
+#### Get Google OAuth to Work with the new Server
+1. For this step, you will need the public IP address of your server and the hostname we found earlier [here](http://www.hcidata.info/host2ip.cgi)
+2. Go to your Google Developer API Console [here](https://console.developers.google.com)
+3. Navigate to APIs & Services > Credentials > Edit Settings
 
 
 ## Third-Party Resources Used to Help
