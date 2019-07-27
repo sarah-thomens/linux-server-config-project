@@ -9,7 +9,7 @@
 
 
 ## URL to Hosted Web Application
-* URL: 18.212.16.202
+* URL: sarahthomens.com
 
 
 ## Software Installed
@@ -239,7 +239,7 @@ The following steps will take you through how to create your own Amazon Lightsai
 	* The file should look like this:
 		```
 		<VirtualHost *:80>
-			ServerName 18.212.16.202
+			ServerName sarahthomens.com
 			ServerAlias ec2-18-212-16-202.compute-1.amazonaws.com
 			WSGIDaemonProcess catalog python-path=/var/www/catalog:/var/www/catalog/venv/lib/python2.7/site-packages
 			WSGIProcessGroup catalog
@@ -258,6 +258,7 @@ The following steps will take you through how to create your own Amazon Lightsai
 			CustomLog ${APACHE_LOG_DIR}/access.log combined
 		</VirtualHost>
 		```
+		* The Servername should either be your public IP address or the domain name you using. If you want Google OAuth to work, you have to use your own domain name.
 	* Enable the newly created virtual host: `sudo a2ensite catalog`
 13. Make a catalog.wsgi file to allow the application to be served over the mod_wsgi
 	* Change to the proper directory
@@ -301,11 +302,14 @@ The following steps will take you through how to create your own Amazon Lightsai
 	if __name__ == "__main__":
 		app.run()
 	```
-3. We need to fix a path so that the project can find certain files. The client secret file path needs to be changed in the application.py
+3. We need to fix a path so that the project can find certain files. The client secret file path needs to be changed in the application.py in two places
 	* `sudo nano application.py`
 	* Find the line that begins with <strong>CLIENT_ID</strong>
 	* Change the line to look like this:
 		* <strong>CLIENT_ID = json.loads(open('/var/www/catalog/catalog/client_secrets.json', 'r').read())['web']['client_id']</strong>
+	* Next, find the line <strong>oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')</strong>
+	* Change the line to look like this:
+		* <strong>oauth_flow = flow_from_clientsecrets('/var/www/catalog/catalog/client_secrets.json', scope='')</strong>
 4. Finally, we need to move a line in application.py somewhere else so it can be called.
 	* `sudo nano application.py`
 	* Scroll to the bottom of the file
@@ -401,9 +405,20 @@ The following steps will take you through how to create your own Amazon Lightsai
 3. If everything works, your application should show here
 
 #### Get Google OAuth to Work with the new Server
-1. For this step, you will need the public IP address of your server and the hostname we found earlier [here](http://www.hcidata.info/host2ip.cgi)
+1. For Google OAuth to work you MUST have your own domain name, a simple IP address will no longer work for Google.
 2. Go to your Google Developer API Console [here](https://console.developers.google.com)
-3. Navigate to APIs & Services > Credentials > Edit Settings
+3. Navigate to APIs & Services > Credentials
+4. Click on the Domain Verification tab
+5. Click Add Domain and fill in your domain name. If you have not verified it before, it will take you through the process of doing so. Follow the prompts.
+6. When you have finished, come back and Click Add Domain again and it will add it to the list.
+7. Click the OAuth Consent Screen Tab.
+8. Scroll down to Authorized domains, type in your domain name, scroll to the bottom and click save
+9. Click the Credentials Tab
+10. Click your project under OAuth 2.0 client IDs
+11. Under Authorized JavaScript origins type in your domain name
+12. Under Authorized redirect URIs type in any redirects your project may make
+13. Scroll to the bottom and click Save
+14. At this point, your application should work with Google OAuth
 
 
 ## Third-Party Resources Used to Help
