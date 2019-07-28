@@ -9,7 +9,7 @@
 
 
 ## URL to Hosted Web Application
-* URL: sarahthomens.com
+* URL: [sarahthomens.com](sarahthomens.com)
 
 
 ## Software Installed
